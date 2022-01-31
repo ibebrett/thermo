@@ -80,7 +80,7 @@ fn update_lines(lines: &mut Vec<Line>, num_lines: usize) {
 
 #[macroquad::main("Thermo")]
 async fn main() {
-    let num_lines = 1000000;
+    let num_lines = 100000;
     let mut lines = Vec::with_capacity(num_lines);
 
     update_lines(&mut lines, num_lines);

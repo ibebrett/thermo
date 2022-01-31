@@ -16,10 +16,8 @@ struct Line {
     p2: Point,
 }
 
-#[macroquad::main("Thermo")]
-async fn main() {
-    let num_lines = 1000000;
-    let mut lines = Vec::with_capacity(num_lines);
+fn update_lines(lines: &mut Vec<Line>, num_lines: usize) {
+    lines.clear();
 
     let step_size = 10.0;
 
@@ -78,20 +76,52 @@ async fn main() {
         lines.push(l);
         last_vec = &lines[lines.len() - 1];
     }
+}
+
+#[macroquad::main("Thermo")]
+async fn main() {
+    let num_lines = 1000000;
+    let mut lines = Vec::with_capacity(num_lines);
+
+    update_lines(&mut lines, num_lines);
+
+    let mut center = Point { x: 500.0, y: 500.0 };
+
+    let mut cam = Camera2D {
+        zoom: Vec2::new(1.0 / screen_width(), 1.0 / screen_height()),
+        ..Default::default()
+    };
 
     loop {
         clear_background(BLACK);
 
+        let mut reset = false;
+        reset |= is_key_pressed(KeyCode::R);
+
+        if is_key_down(KeyCode::Right) {
+            center.x += 10.0;
+        }
+        if is_key_down(KeyCode::Left) {
+            center.x -= 10.0;
+        }
+        if is_key_down(KeyCode::Down) {
+            center.y -= 10.0;
+        }
+        if is_key_down(KeyCode::Up) {
+            center.y += 10.0;
+        }
+
+        cam.target.x = center.x;
+        cam.target.y = center.y;
+        set_camera(&cam);
+
+        if reset {
+            update_lines(&mut lines, num_lines);
+        }
+
         for l in &lines {
             draw_line(l.p1.x, l.p1.y, l.p2.x, l.p2.y, 1.0, YELLOW);
         }
-        /*
-        for _ in 0..255 {
-            let x = rand_uniform() * screen_width();
-            let y = rand_uniform() * screen_height();
-
-            draw_circle(x, y, 15.0 * rand_uniform(), YELLOW);
-        }*/
 
         next_frame().await
     }
